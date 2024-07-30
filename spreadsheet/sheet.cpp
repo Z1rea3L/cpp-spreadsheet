@@ -25,10 +25,10 @@ void Sheet::SetCell(Position pos, std::string text) {
 }
 
 const CellInterface* Sheet::GetCell(Position pos) const {
-    return GetConcreteCell(pos);
+    return GetCellPtr(pos);
 }
 
-const Cell* Sheet::GetConcreteCell(Position pos) const {
+const Cell* Sheet::GetCellPtr(Position pos) const {
     if (!pos.IsValid()){
         throw InvalidPositionException("Invalid position");
     }
@@ -38,15 +38,15 @@ const Cell* Sheet::GetConcreteCell(Position pos) const {
         return nullptr;
     }
 
-    return cells_.at(pos).get();
+    return cell->second.get();
 }
 
-Cell* Sheet::GetConcreteCell(Position pos) {
-    return const_cast<Cell*>(static_cast<const Sheet&>(*this).GetConcreteCell(pos));
+Cell* Sheet::GetCellPtr(Position pos) {
+    return const_cast<Cell*>(static_cast<const Sheet&>(*this).GetCellPtr(pos));
 }
 
 CellInterface* Sheet::GetCell(Position pos) {
-    return GetConcreteCell(pos);
+    return GetCellPtr(pos);
 }
 
 void Sheet::ClearCell(Position pos) {
@@ -83,30 +83,37 @@ void Sheet::PrintValues(std::ostream& output) const {
             if (col > 0){
                 output << '\t';
             }
-            
-            const auto& cell = cells_.find({ row, col });
-            if (cell != cells_.end() && cell->second != nullptr && !cell->second->GetText().empty()) {
-                std::visit([&](const auto value) { output << value; }, cell->second->GetValue());
-            }
+            PrintCellValue(output, {row, col});
         }
         
         output << '\n';
     }
 }
+
 void Sheet::PrintTexts(std::ostream& output) const {
     for (int row = 0; row < sheet_rows_; ++row) {
         for (int col = 0; col < sheet_cols_; ++col) {
             if (col > 0){
                 output << '\t';
             }
-            
-            const auto& cell = cells_.find({ row, col });
-            if (cell != cells_.end() && cell->second != nullptr && !cell->second->GetText().empty()) {
-                output << cell->second->GetText();
-            }
+            PrintCellText(output, {row, col});
         }
         
         output << '\n';
+    }
+}
+
+void Sheet::PrintCellValue(std::ostream& output, Position pos)const{
+    const auto& cell = cells_.find(pos);
+    if (cell != cells_.end() && cell->second != nullptr && !cell->second->GetText().empty()) {
+        std::visit([&](const auto value) { output << value; }, cell->second->GetValue());
+    }
+}
+
+void Sheet::PrintCellText(std::ostream& output, Position pos)const{
+    const auto& cell = cells_.find(pos);
+    if (cell != cells_.end() && cell->second != nullptr && !cell->second->GetText().empty()) {
+        output << cell->second->GetText();
     }
 }
 

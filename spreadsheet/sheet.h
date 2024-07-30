@@ -23,8 +23,8 @@ public:
     const CellInterface* GetCell(Position pos) const override;
     CellInterface* GetCell(Position pos) override;
     
-    const Cell* GetConcreteCell(Position pos) const;
-    Cell* GetConcreteCell(Position pos);
+    const Cell* GetCellPtr(Position pos) const;
+    Cell* GetCellPtr(Position pos);
     
     void ClearCell(Position pos) override;
     Size GetPrintableSize() const override;
@@ -36,6 +36,8 @@ private:
     int sheet_rows_ = 0;
     int sheet_cols_ = 0;
     void UpdateSheetSize();
+    void PrintCellValue(std::ostream& output, Position pos)const;
+    void PrintCellText(std::ostream& output, Position pos)const;
     
     std::unordered_map<Position, std::unique_ptr<Cell>, CellHasher> cells_;
 };

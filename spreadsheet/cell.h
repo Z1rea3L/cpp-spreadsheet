@@ -78,7 +78,8 @@ private:
     };
     
     bool IsCyclicDepend(const Impl& impl) const;
-    void UpdateCache(bool flag = false);
+    void UpdateCache();
+    void CellDependesProcessing();
 
     std::unique_ptr<Impl> impl_;
     Sheet& sheet_;

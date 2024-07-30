@@ -37,7 +37,7 @@ std::ostream& operator<<(std::ostream& output, FormulaError fe) {
 }
 
 //Formula =================
-FormulaInterface::Value Formula::Evaluate(const SheetInterface& sheet) const{
+FormulaInterface::Value Formula::Evaluate(const SheetInterface& sheet) const{ //idk (sad emoji)
     const auto cell_check = [&sheet](Position pos)->double{
         if (!pos.IsValid()){
             throw FormulaError(FormulaError::Category::Ref);

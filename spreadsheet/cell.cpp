@@ -33,6 +33,11 @@ void Cell::Set(std::string text) {
     
     impl_ = std::move(impl);
 
+    CellDependesProcessing();
+    UpdateCache();
+}
+
+void Cell::CellDependesProcessing(){
     for (Cell* cell : cell_depend_to_) {
         cell->cell_depend_from_.erase(this);
     }
@@ -40,18 +45,17 @@ void Cell::Set(std::string text) {
     cell_depend_to_.clear();
     
     for (const auto& pos : impl_->GetReferencedCells()) {
-        Cell* cell = sheet_.GetConcreteCell(pos);
+        Cell* cell = sheet_.GetCellPtr(pos);
         if (!cell){
             sheet_.SetCell(pos, "");
-            cell = sheet_.GetConcreteCell(pos);
+            cell = sheet_.GetCellPtr(pos);
         }
         
         cell_depend_to_.insert(cell);
         cell->cell_depend_from_.insert(this);
     }
-
-    UpdateCache(true);
 }
+
 void Cell::Clear() {
     impl_ = std::make_unique<EmptyImpl>();
 }
@@ -78,7 +82,7 @@ bool Cell::IsCyclicDepend(const Impl& impl) const {
 
     std::unordered_set<const Cell*> referenced_cells;
     for (const auto& pos : impl.GetReferencedCells()) {
-        referenced_cells.insert(sheet_.GetConcreteCell(pos));
+        referenced_cells.insert(sheet_.GetCellPtr(pos));
     }
 
     std::unordered_set<const Cell*> checked;
@@ -105,8 +109,8 @@ bool Cell::IsCyclicDepend(const Impl& impl) const {
     return false;
 }
 
-void Cell::UpdateCache(bool flag) {
-    if (impl_->IsCacheValid() || flag) {
+void Cell::UpdateCache() {
+    if (impl_->IsCacheValid()) {
         impl_->InvalidateCache();
         
         for (Cell* cell : cell_depend_from_) {
